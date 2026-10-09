@@ -1,0 +1,357 @@
+/* ============================================================================
+   ARCHIVO: styles.css
+   PROPÓSITO GENERAL: Estilo visual alegre, legible y responsivo de
+   FrutiFracciones (Flexbox + CSS Grid).
+
+   PUNTOS DE EDICIÓN / PERSONALIZACIÓN (resumen):
+   - Paleta, tipografías, radios y sombras: variables en :root (bloque 1).
+   - Tamaño de los gráficos de fruta: CONFIG.SIZES en script.js (el SVG escala
+     con max-width:100%).
+   - Duración de animaciones: busca "animation" / "transition".
+   ============================================================================ */
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 1: Variables globales (tema)
+   PROPÓSITO: Un único lugar para cambiar colores, fuentes y bordes.
+   PERSONALIZACIÓN: Cambia cualquier valor. --color-a lo reescribe JavaScript
+   según la fruta elegida; --color-b y --color-c también se sincronizan con
+   CONFIG en script.js.
+   ---------------------------------------------------------------------------- */
+:root {
+  --bg-1: #fff6d6;
+  --bg-2: #d9f1ff;
+  --ink: #2b2d42;
+  --ink-soft: #5c607a;
+  --card: #ffffff;
+  --primary: #ff6b4a;
+  --primary-dark: #e2512f;
+  --success: #12b886;
+  --success-dark: #0c946a;
+  --accent: #ffd43b;
+  --danger: #e03131;
+  --line: #e7e9f3;
+
+  --color-a: #e53935;   /* fracción A (la actualiza JS según la fruta) */
+  --color-b: #2f80ed;   /* fracción B (CONFIG.OPERAND_COLOR_B) */
+  --color-c: #8e44ad;   /* parte sobrante (CONFIG.THIRD_COLOR) */
+
+  --radius: 22px;
+  --radius-small: 14px;
+  --shadow: 0 10px 28px rgba(43, 45, 66, .12);
+  --font-title: "Baloo 2", "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 2: Reset básico y estilos base
+   PROPÓSITO: Normalizar márgenes, definir fondo y tipografía general.
+   PERSONALIZACIÓN: Cambia el degradado del fondo (--bg-1 / --bg-2) o el
+   tamaño base de la letra (font-size del body).
+   ---------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: linear-gradient(160deg, var(--bg-1), var(--bg-2)) fixed;
+  line-height: 1.5;
+}
+
+[hidden] { display: none !important; }
+
+/* Texto solo para lectores de pantalla */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* Foco visible y consistente para teclado */
+:focus-visible { outline: 4px solid #1d3557; outline-offset: 2px; }
+
+.skip-link {
+  position: absolute; left: 8px; top: -60px; z-index: 100;
+  background: var(--ink); color: #fff; padding: .6rem 1rem;
+  border-radius: 10px; text-decoration: none; transition: top .2s;
+}
+.skip-link:focus { top: 8px; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 3: Encabezado, contenedor principal y tarjetas
+   PROPÓSITO: Estructura general de la página.
+   PERSONALIZACIÓN: max-width del .app-main controla el ancho en escritorio.
+   ---------------------------------------------------------------------------- */
+.app-header { text-align: center; padding: 1.6rem 1rem .6rem; }
+.app-header h1 {
+  margin: 0; font-family: var(--font-title); font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3.2rem); color: var(--primary-dark);
+  text-shadow: 0 3px 0 rgba(255, 255, 255, .8);
+}
+.logo { display: inline-block; animation: bounce 2.4s ease-in-out infinite; }
+.subtitle { margin: .2rem 0 0; font-size: 1.15rem; color: var(--ink-soft); font-weight: 700; }
+
+.app-main {
+  width: min(1100px, 100% - 1.5rem);
+  margin: 1rem auto 2rem;
+  display: grid; gap: 1.2rem;
+}
+
+.card {
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 1.3rem 1.4rem;
+}
+.card h2 {
+  margin: 0 0 .8rem; font-family: var(--font-title); font-size: 1.5rem;
+  display: flex; align-items: center; gap: .6rem;
+}
+.step-dot {
+  display: inline-grid; place-items: center; width: 2rem; height: 2rem;
+  border-radius: 50%; background: var(--accent); color: var(--ink);
+  font-size: 1.1rem; font-weight: 800;
+}
+.sub-title { font-family: var(--font-title); font-size: 1.25rem; margin: 1.2rem 0 .5rem; }
+.help { margin: 0 0 .8rem; color: var(--ink-soft); }
+.hint { color: var(--ink-soft); font-style: italic; margin: .4rem 0; }
+
+.app-footer { text-align: center; padding: 1rem; color: var(--ink-soft); font-weight: 700; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 4: Selector visual de fruta
+   PROPÓSITO: Tarjetas-radio con miniatura SVG para elegir la fruta.
+   PERSONALIZACIÓN: Cambia minmax(110px, 1fr) para el tamaño de cada tarjeta.
+   ---------------------------------------------------------------------------- */
+.fruit-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: .8rem; }
+.fruit-option { position: relative; cursor: pointer; }
+.fruit-option input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.fruit-card {
+  display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  padding: .7rem .4rem; border-radius: var(--radius-small);
+  border: 3px solid var(--line); background: #fffdf5;
+  font-weight: 800; transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+.fruit-option:hover .fruit-card { transform: translateY(-3px); }
+.fruit-option input:checked + .fruit-card {
+  border-color: var(--primary); background: #fff0ea;
+  box-shadow: 0 6px 16px rgba(255, 107, 74, .3);
+}
+.fruit-option input:focus-visible + .fruit-card { outline: 4px solid #1d3557; outline-offset: 2px; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 5: Pestañas de modo
+   PROPÓSITO: Botones grandes y táctiles para cambiar de modo.
+   PERSONALIZACIÓN: Colores de la pestaña activa en .tab[aria-selected="true"].
+   ---------------------------------------------------------------------------- */
+.tabs { display: flex; gap: .6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.tab {
+  flex: 1 1 180px; padding: .8rem 1rem; border: 3px solid var(--line);
+  border-radius: var(--radius-small); background: #f7f8fd; color: var(--ink);
+  font: 800 1.15rem var(--font-title); cursor: pointer; transition: all .15s;
+}
+.tab:hover { background: #eef1ff; }
+.tab[aria-selected="true"] {
+  background: var(--primary); border-color: var(--primary-dark); color: #fff;
+  box-shadow: 0 6px 14px rgba(255, 107, 74, .35);
+}
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 6: Botones
+   PROPÓSITO: Controles grandes (aptos para pantallas táctiles, ≥ 44px).
+   PERSONALIZACIÓN: .btn-primary (acción principal), .btn-success (siguiente).
+   ---------------------------------------------------------------------------- */
+.btn {
+  min-height: 46px; padding: .6rem 1.1rem; border-radius: 999px;
+  border: 3px solid var(--line); background: #fff; color: var(--ink);
+  font: 800 1rem var(--font-body); cursor: pointer;
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(43, 45, 66, .15); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-primary { background: var(--primary); border-color: var(--primary-dark); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-success { background: var(--success); border-color: var(--success-dark); color: #fff; }
+.btn-small { min-height: 40px; padding: .4rem .8rem; font-size: .92rem; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 7: Formulario de fracciones (entradas numerador/denominador)
+   PROPÓSITO: Fracciones "apiladas" como en el cuaderno, con raya central.
+   PERSONALIZACIÓN: Ancho de los inputs (width) y tamaño de letra (font-size).
+   ---------------------------------------------------------------------------- */
+.fraction-form {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 1.2rem 1.6rem; padding: 1rem; background: #f7f9ff; border-radius: var(--radius);
+}
+.fraction-input { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.group-label { font-weight: 800; color: var(--ink-soft); font-size: .9rem; }
+.fraction-input input, .op-select select {
+  width: 5.4rem; padding: .5rem; text-align: center;
+  font: 800 1.6rem var(--font-title); color: var(--ink);
+  border: 3px solid var(--line); border-radius: 14px; background: #fff;
+}
+.fraction-input input:focus, .op-select select:focus { border-color: var(--primary); }
+.fraction-input .bar { display: block; width: 5.4rem; height: 5px; border-radius: 4px; background: var(--ink); }
+.op-select { display: flex; flex-direction: column; gap: .3rem; font-weight: 800; }
+.op-select select { width: auto; font: 800 1.1rem var(--font-body); padding: .6rem; }
+
+.error {
+  margin: .8rem 0 0; padding: .7rem 1rem; border-radius: var(--radius-small);
+  background: #ffe3e3; color: #a51111; font-weight: 800;
+}
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 8: Leyenda de colores
+   PROPÓSITO: Explicar qué significa cada color de los trozos.
+   PERSONALIZACIÓN: Los colores vienen de las variables --color-a/b/c.
+   ---------------------------------------------------------------------------- */
+.legend { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; list-style: none; padding: 0; margin: .9rem 0 0; font-weight: 700; font-size: .95rem; }
+.legend li { display: flex; align-items: center; gap: .4rem; }
+.chip { width: 1.1rem; height: 1.1rem; border-radius: 50%; display: inline-block; border: 2px solid rgba(0, 0, 0, .15); }
+.chip-a { background: var(--color-a); }
+.chip-b { background: var(--color-b); }
+.chip-c { background: var(--color-c); }
+.chip-x { background: repeating-linear-gradient(45deg, #fff, #fff 3px, #f2b3b3 3px, #f2b3b3 5px); border-style: dashed; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 9: Notación de fracciones en HTML (clase .frac)
+   PROPÓSITO: Mostrar fracciones apiladas dentro de los textos explicativos.
+   PERSONALIZACIÓN: Grosor de la raya (border-bottom) y separación (margin).
+   ---------------------------------------------------------------------------- */
+.frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.05; margin: 0 .2em; font-weight: 800; position: relative; }
+.frac .num { padding: 0 .3em .08em; border-bottom: .12em solid currentColor; }
+.frac .den { padding: .08em .3em 0; }
+.whole { font-weight: 800; }
+.op-inline { font-weight: 800; margin: 0 .3em; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 10: Figuras (frutas) y filas de figuras
+   PROPÓSITO: Distribuir las frutas SVG con su pie de foto y los símbolos
+   de operación (+, −, ×, ÷, =) entre ellas.
+   PERSONALIZACIÓN: Cambia gap, el tamaño del símbolo (.op-symbol font-size)
+   o el efecto de sombra (.fruit-svg filter).
+   ---------------------------------------------------------------------------- */
+.figure-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .8rem 1rem; padding: .6rem 0; }
+.figure { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .5rem .7rem; background: #fffdf5; border: 2px dashed var(--line); border-radius: var(--radius-small); max-width: 100%; }
+.fruits { display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem; }
+.figure-caption { font-size: 1.25rem; font-weight: 800; text-align: center; }
+.op-symbol { font: 800 2.4rem var(--font-title); color: var(--primary-dark); }
+.too-many { max-width: 260px; text-align: center; font-weight: 700; color: var(--ink-soft); padding: .8rem; }
+
+.fruit-wrap { display: inline-block; max-width: 100%; }
+.fruit-svg { max-width: 100%; height: auto; overflow: visible; }
+
+/* Trozos: animación de "destello" al hacer clic/colorear */
+.slice { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); outline: none; }
+.slice.clickable { cursor: pointer; }
+.slice.clickable:hover path:first-of-type { filter: brightness(1.1); }
+.slice.pulse { animation: flash .45s ease; }
+.slice:focus-visible path[fill="none"] { stroke: #1d3557; stroke-opacity: 1; stroke-width: 4; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 11: Pasos explicativos
+   PROPÓSITO: Tarjetas numeradas con el texto del procedimiento y las frutas.
+   PERSONALIZACIÓN: Color de la insignia (.step-badge) y animación de entrada.
+   ---------------------------------------------------------------------------- */
+.steps-controls { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin: 1.2rem 0 .4rem; }
+.steps { display: grid; gap: 1rem; margin-top: 1rem; }
+.step { background: #f9fbff; border: 3px solid #dbe4ff; border-radius: var(--radius); padding: 1rem 1.2rem; animation: slideIn .45s ease both; }
+.step-header { display: flex; align-items: center; gap: .7rem; }
+.step-header h3 { margin: 0; font-family: var(--font-title); font-size: 1.25rem; }
+.step-badge { flex: none; display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--primary); color: #fff; font: 800 1.1rem var(--font-title); }
+.step-text { margin: .6rem 0 .2rem; font-size: 1.1rem; }
+.result-banner {
+  text-align: center; font-size: 1.6rem; font-weight: 800; padding: 1rem;
+  border-radius: var(--radius); background: linear-gradient(135deg, #d3f9d8, #fff3bf);
+  border: 3px solid var(--success); animation: slideIn .5s ease both;
+}
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 12: Modo práctica
+   PROPÓSITO: Barra de nivel/marcador, enunciado, zona de respuesta y feedback.
+   PERSONALIZACIÓN: Colores de .feedback.ok / .bad / .info.
+   ---------------------------------------------------------------------------- */
+.practice-top { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; margin-bottom: 1rem; }
+.level-box { display: flex; flex-direction: column; font-weight: 800; gap: .2rem; }
+.level-box select { padding: .6rem; border-radius: 12px; border: 3px solid var(--line); font: 700 1rem var(--font-body); }
+.scoreboard { margin-left: auto; display: flex; gap: 1.2rem; flex-wrap: wrap; font-weight: 800; background: #fff8db; padding: .6rem 1rem; border-radius: 999px; border: 2px solid var(--accent); }
+
+.problem-card { background: #f7f9ff; border-radius: var(--radius); padding: 1rem; text-align: center; }
+.problem-expression { margin: 0; font: 800 2rem var(--font-title); }
+.qmark { color: var(--primary); }
+
+.answer-card { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: var(--radius); border: 3px solid #ffe8a3; background: #fffdf2; }
+.answer-row { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: center; }
+.answer-tools { display: flex; flex-wrap: wrap; gap: .5rem; }
+.answer-fruits { margin: .8rem 0; display: flex; justify-content: center; }
+.answer-summary { width: 100%; text-align: center; font-weight: 800; margin: .3rem 0 0; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-top: .6rem; }
+
+.feedback { min-height: 3rem; margin: .8rem 0 0; padding: .7rem 1rem; border-radius: var(--radius-small); font-weight: 800; text-align: center; }
+.feedback:empty { display: none; }
+.feedback.ok { background: #d3f9d8; color: #12602f; animation: bounce .6s; }
+.feedback.bad { background: #ffe3e3; color: #a51111; }
+.feedback.info { background: #e7f5ff; color: #0b4d80; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 13: Confeti
+   PROPÓSITO: Lluvia de emojis al acertar (la crea celebrate() en script.js).
+   PERSONALIZACIÓN: Cambia la animación "fall" o desactívala con
+   CONFIG.CONFETTI_ENABLED = false.
+   ---------------------------------------------------------------------------- */
+#confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
+#confetti span { position: absolute; top: -3rem; animation: fall linear forwards; }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 14: Animaciones
+   PROPÓSITO: Pequeños movimientos para dar vida a la interfaz.
+   PERSONALIZACIÓN: Ajusta duraciones o elimina keyframes si no los quieres.
+   ---------------------------------------------------------------------------- */
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes flash { 0% { opacity: .35; } 100% { opacity: 1; } }
+@keyframes fall { to { transform: translateY(110vh) rotate(540deg); opacity: .8; } }
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 15: Diseño responsivo
+   PROPÓSITO: Adaptar a tabletas y móviles.
+   PERSONALIZACIÓN: Cambia los puntos de quiebre (760px, 480px) si lo necesitas.
+   ---------------------------------------------------------------------------- */
+@media (max-width: 760px) {
+  .card { padding: 1rem; }
+  .fraction-form { flex-direction: column; }
+  .scoreboard { margin-left: 0; }
+  .problem-expression { font-size: 1.5rem; }
+}
+@media (max-width: 480px) {
+  body { font-size: 1rem; }
+  .tab { flex-basis: 100%; }
+  .op-symbol { font-size: 1.8rem; }
+}
+
+
+/* ----------------------------------------------------------------------------
+   BLOQUE 16: Accesibilidad - movimiento reducido
+   PROPÓSITO: Respetar a quienes desactivan animaciones en su sistema.
+   PERSONALIZACIÓN: Normalmente no se toca.
+   ---------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
