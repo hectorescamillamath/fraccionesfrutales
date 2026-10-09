@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  ARCHIVO: index.html
+  PROPÓSITO GENERAL: Estructura semántica y accesible de FrutiFracciones.
+  Aquí solo hay "esqueleto": los gráficos de frutas, los pasos y los textos
+  dinámicos los genera script.js dentro de los contenedores vacíos.
+
+  PUNTOS DE EDICIÓN / PERSONALIZACIÓN (resumen):
+   - Título, subtítulo y textos de ayuda: editar directamente en este archivo.
+   - Límites de numerador/denominador: NO se editan aquí, sino en CONFIG
+     dentro de script.js (los atributos min/max se asignan por JavaScript).
+   - Frutas disponibles: se definen en FRUITS (script.js); el menú se crea solo.
+   - Colores y tamaños: en styles.css (variables :root) y CONFIG (script.js).
+  ============================================================================
+-->
+<html lang="es">
+<head>
+  <!--
+    BLOQUE: <head>
+    PROPÓSITO: Metadatos, tipografía y enlace a la hoja de estilos.
+    PERSONALIZACIÓN: Cambia <title> y la meta description para tu clase/colegio.
+    Puedes cambiar la fuente editando la URL de Google Fonts (y --font-title /
+    --font-body en styles.css).
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FrutiFracciones · Aprende fracciones con frutas</title>
+  <meta name="description" content="Aplicación interactiva para aprender a sumar, restar, multiplicar y dividir fracciones usando frutas cortadas en partes iguales.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!--
+    BLOQUE: Enlace de accesibilidad
+    PROPÓSITO: Permite a quien navega con teclado saltar directo al contenido.
+    PERSONALIZACIÓN: Solo el texto del enlace.
+  -->
+  <a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+  <!--
+    BLOQUE: Encabezado de la aplicación
+    PROPÓSITO: Identidad visual y mensaje de bienvenida.
+    PERSONALIZACIÓN: Cambia el emoji del logo, el nombre y el subtítulo.
+  -->
+  <header class="app-header">
+    <h1><span class="logo" aria-hidden="true">🍎</span> FrutiFracciones</h1>
+    <p class="subtitle">¡Corta, colorea y descubre cómo funcionan las fracciones!</p>
+  </header>
+
+  <main id="main" class="app-main">
+
+    <!--
+      BLOQUE: 1. Selector de fruta base
+      PROPÓSITO: Menú visual (grupo de radios) para elegir con qué fruta se dibuja.
+      El contenedor #fruit-selector lo rellena script.js a partir de FRUITS,
+      así que añadir una fruta nueva en JS la agrega aquí automáticamente.
+      PERSONALIZACIÓN: Cambia el título de la sección.
+    -->
+    <section class="card" aria-labelledby="fruit-title">
+      <h2 id="fruit-title"><span class="step-dot">1</span> Elige tu fruta</h2>
+      <div id="fruit-selector" class="fruit-selector" role="radiogroup" aria-labelledby="fruit-title"></div>
+    </section>
+
+    <!--
+      BLOQUE: 2. Pestañas de modo de trabajo
+      PROPÓSITO: Alternar entre Modo Exploración (demostración paso a paso)
+      y Modo Práctica (desafíos aleatorios). Patrón ARIA "tabs".
+      PERSONALIZACIÓN: Cambia los textos/emojis de los botones.
+    -->
+    <section class="card" aria-labelledby="mode-title">
+      <h2 id="mode-title"><span class="step-dot">2</span> ¿Qué quieres hacer?</h2>
+      <div class="tabs" role="tablist" aria-label="Modos de trabajo">
+        <button class="tab" role="tab" id="tab-explore" aria-controls="panel-explore" aria-selected="true">🔍 Explorar</button>
+        <button class="tab" role="tab" id="tab-practice" aria-controls="panel-practice" aria-selected="false" tabindex="-1">🎯 Practicar</button>
+      </div>
+
+      <!--
+        =====================================================================
+        PANEL: MODO EXPLORACIÓN
+        PROPÓSITO: El estudiante escribe una o dos fracciones, elige la
+        operación y la app muestra la solución paso a paso con frutas.
+        =====================================================================
+      -->
+      <div id="panel-explore" role="tabpanel" aria-labelledby="tab-explore">
+
+        <!--
+          Formulario de entrada.
+          PERSONALIZACIÓN: Para quitar una operación, borra su <option>.
+          El valor "ver" muestra una sola fracción (y su simplificación).
+        -->
+        <form id="explore-form" class="fraction-form" novalidate>
+          <div class="fraction-input" id="group-a">
+            <span class="group-label">Fracción A</span>
+            <input id="n1" type="number" inputmode="numeric" value="1" aria-label="Numerador de la fracción A">
+            <span class="bar" aria-hidden="true"></span>
+            <input id="d1" type="number" inputmode="numeric" value="2" aria-label="Denominador de la fracción A">
+          </div>
+
+          <div class="op-select">
+            <label for="operation">Operación</label>
+            <select id="operation">
+              <option value="+" selected>➕ Sumar</option>
+              <option value="-">➖ Restar</option>
+              <option value="×">✖️ Multiplicar</option>
+              <option value="÷">➗ Dividir</option>
+              <option value="ver">👀 Solo ver una fracción</option>
+            </select>
+          </div>
+
+          <div class="fraction-input" id="group-b">
+            <span class="group-label">Fracción B</span>
+            <input id="n2" type="number" inputmode="numeric" value="1" aria-label="Numerador de la fracción B">
+            <span class="bar" aria-hidden="true"></span>
+            <input id="d2" type="number" inputmode="numeric" value="3" aria-label="Denominador de la fracción B">
+          </div>
+
+          <button type="submit" id="solve-btn" class="btn btn-primary">✨ ¡Resolver paso a paso!</button>
+        </form>
+
+        <!-- Mensaje de error de validación (se muestra solo si hace falta). -->
+        <p id="explore-error" class="error" role="alert" hidden></p>
+
+        <!--
+          Leyenda de colores: los colores se actualizan desde JS con la fruta
+          elegida (variable CSS --color-a) y CONFIG.OPERAND_COLOR_B.
+        -->
+        <ul class="legend" aria-label="Leyenda de colores">
+          <li><span class="chip chip-a"></span> Fracción A</li>
+          <li><span class="chip chip-b"></span> Fracción B</li>
+          <li><span class="chip chip-c"></span> Parte sobrante (división)</li>
+          <li><span class="chip chip-x"></span> Trozos que se quitan</li>
+        </ul>
+
+        <!-- Vista previa en vivo de las fracciones que se están escribiendo. -->
+        <h3 class="sub-title">Así se ven tus fracciones</h3>
+        <div id="preview" class="figure-row" aria-live="polite"></div>
+
+        <!-- Controles del paso a paso (se muestran tras pulsar "Resolver"). -->
+        <div id="steps-controls" class="steps-controls" hidden>
+          <button type="button" id="next-step" class="btn btn-primary">👉 Siguiente paso</button>
+          <button type="button" id="show-all" class="btn">📜 Mostrar todo</button>
+          <button type="button" id="restart-steps" class="btn">🔄 Volver al inicio</button>
+        </div>
+
+        <!-- Contenedor de los pasos explicados (lo llena script.js). -->
+        <div id="explore-steps" class="steps" aria-live="polite"></div>
+      </div>
+
+      <!--
+        =====================================================================
+        PANEL: MODO PRÁCTICA / DESAFÍO
+        PROPÓSITO: La app genera un problema aleatorio. El estudiante responde
+        escribiendo la fracción y/o haciendo clic en los trozos de la fruta.
+        =====================================================================
+      -->
+      <div id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" hidden>
+
+        <!-- Barra superior: nivel, nuevo problema y marcador.
+             PERSONALIZACIÓN: Los niveles se definen en CONFIG.LEVELS (script.js). -->
+        <div class="practice-top">
+          <div class="level-box">
+            <label for="level">Nivel</label>
+            <select id="level"></select>
+          </div>
+          <button type="button" id="new-problem" class="btn">🎲 Nuevo problema</button>
+          <div class="scoreboard" role="group" aria-label="Marcador">
+            <span title="Problemas resueltos">⭐ <b id="score-correct">0</b> / <b id="score-total">0</b></span>
+            <span title="Racha de aciertos seguidos">🔥 Racha: <b id="score-streak">0</b></span>
+          </div>
+        </div>
+
+        <!-- Enunciado del problema (lo dibuja script.js). -->
+        <div class="problem-card" aria-live="polite">
+          <p id="problem-text" class="problem-expression"></p>
+          <div id="problem-figures" class="figure-row"></div>
+        </div>
+
+        <!-- Zona de respuesta: entradas numéricas + fruta interactiva. -->
+        <div class="answer-card">
+          <h3 class="sub-title">Tu respuesta</h3>
+          <p class="help">Escribe la fracción <b>o</b> haz clic en los trozos para colorearlos. ¡Ambas formas se mantienen sincronizadas!</p>
+
+          <div class="answer-row">
+            <div class="fraction-input">
+              <input id="ans-n" type="number" inputmode="numeric" value="0" aria-label="Numerador de tu respuesta">
+              <span class="bar" aria-hidden="true"></span>
+              <input id="ans-d" type="number" inputmode="numeric" value="2" aria-label="Denominador de tu respuesta (en cuántas partes cortas la fruta)">
+            </div>
+            <div class="answer-tools">
+              <button type="button" id="less-fruit" class="btn btn-small">➖ Quitar fruta</button>
+              <button type="button" id="more-fruit" class="btn btn-small">➕ Agregar fruta</button>
+              <button type="button" id="clear-answer" class="btn btn-small">🧹 Borrar</button>
+            </div>
+          </div>
+
+          <div id="answer-fruits" class="answer-fruits"></div>
+
+          <div class="actions">
+            <button type="button" id="check-btn" class="btn btn-primary">✅ Comprobar</button>
+            <button type="button" id="solution-btn" class="btn">💡 Ver solución</button>
+            <button type="button" id="next-btn" class="btn btn-success" hidden>➡️ Siguiente problema</button>
+          </div>
+
+          <!-- Retroalimentación inmediata (aciertos, pistas, ánimo). -->
+          <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- Solución paso a paso del problema actual (oculta hasta pedirla). -->
+        <div id="practice-solution" class="steps" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Capa decorativa para la lluvia de confeti al acertar. -->
+  <div id="confetti" aria-hidden="true"></div>
+
+  <!--
+    BLOQUE: Pie de página
+    PERSONALIZACIÓN: Agrega tu nombre, colegio o enlace al repositorio.
+  -->
+  <footer class="app-footer">
+    <p>Hecho con 🍎🍊🍉🍋🍕 para aprender matemáticas jugando.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
